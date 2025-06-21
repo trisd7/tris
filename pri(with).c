@@ -1,56 +1,55 @@
 #include <stdio.h>
 
-int main() {
-    int p[20], bt[20], pri[20], at[20], wt[20], tat[20], completed[20];
-    int i, n, time = 0, total = 0;
-    float wtavg = 0, tatavg = 0;
-
-    printf("Enter the number of processes: ");
+void main() {
+    int n, i, time = 0, comp = 0, index;
+    printf("Enter number of processes: ");
     scanf("%d", &n);
-
-    for(i = 0; i < n; i++) {
-        p[i] = i;
-        printf("Enter Arrival Time, Burst Time & Priority of Process %d: ", i);
-        scanf("%d %d %d", &at[i], &bt[i], &pri[i]);
-        completed[i] = 0;
+    
+    int pid[n], at[n], bt[n], pr[n], ct[n], tat[n], wt[n], x[n];
+    float awt = 0, atat = 0;
+    
+    for (i = 0; i < n; i++) {
+        printf("Enter Arrival Time, Burst Time, and Priority of Process %d: ", i + 1);
+        scanf("%d %d %d", &at[i], &bt[i], &pr[i]);
+        pid[i] = i + 1;
+        x[i] = bt[i];
     }
-
-    printf("\nPROCESS\tARRIVAL\tBURST\tPRIORITY\tWAITING\tTURNAROUND");
-
-    while(total < n) {
-        int idx = -1;
-        int highest_priority = 9999;
-
-        // Find highest priority process among arrived and not yet completed
-        for(i = 0; i < n; i++) {
-            if(at[i] <= time && !completed[i]) {
-                if(pri[i] < highest_priority) {
-                    highest_priority = pri[i];
-                    idx = i;
-                }
+    
+    int min_priority, selected;
+    while (comp < n) {
+        min_priority = 9999;
+        selected = -1;
+        
+        for (i = 0; i < n; i++) {
+            if (at[i] <= time && bt[i] > 0 && pr[i] < min_priority) {
+                min_priority = pr[i];
+                selected = i;
             }
         }
-
-        if(idx != -1) {
-            wt[idx] = time - at[idx];
-            if (wt[idx] < 0) wt[idx] = 0;
-            tat[idx] = wt[idx] + bt[idx];
-
-            time += bt[idx];
-            completed[idx] = 1;
-            total++;
-
-            wtavg += wt[idx];
-            tatavg += tat[idx];
-
-            printf("\nP%d\t%d\t%d\t\t%d\t%d\t%d", p[idx], at[idx], bt[idx], pri[idx], wt[idx], tat[idx]);
-        } else {
-            time++; // No process ready, CPU idle
+        
+        if (selected == -1) {
+            time++; // If no process is available, CPU remains idle
+            continue;
+        }
+        
+        bt[selected]--; // Execute the selected process for 1 time unit
+        time++;
+        
+        if (bt[selected] == 0) { // Process completed
+            comp++;
+            ct[selected] = time;
+            tat[selected] = ct[selected] - at[selected];
+            wt[selected] = tat[selected] - x[selected];
+            awt += wt[selected];
+            atat += tat[selected];
         }
     }
-
-    printf("\n\nAverage Waiting Time: %.2f", wtavg / n);
-    printf("\nAverage Turnaround Time: %.2f\n", tatavg / n);
-
-    return 0;
+    
+    printf("\nProcess\tAT\tBT\tPriority\tCT\tTAT\tWT\n");
+    for (i = 0; i < n; i++) {
+        printf("%d\t%d\t%d\t%d\t%d\t%d\t%d\n", pid[i], at[i], x[i], pr[i], ct[i], tat[i], wt[i]);
+    }
+    
+    printf("\nAverage Waiting Time: %.2f", awt / n);
+    printf("\nAverage Turnaround Time: %.2f\n", atat / n);
 }
