@@ -64,9 +64,13 @@ int main() {
         f[pid].need[i] -= request[i];
     }
 
-    // --- Safety Algorithm ---
+    // --- Safety Algorithm with work[] to display updated available ---
     cnt = 0;
     fl = 0;
+    int work[10];
+    for (i = 0; i < r; i++)
+        work[i] = avail[i];
+
     for (i = 0; i < n; i++)
         f[i].flag = 0;
 
@@ -76,20 +80,19 @@ int main() {
             if (f[i].flag == 0) {
                 int can_allocate = 1;
                 for (j = 0; j < r; j++) {
-                    if (f[i].need[j] > avail[j]) {
+                    if (f[i].need[j] > work[j]) {
                         can_allocate = 0;
                         break;
                     }
                 }
 
                 if (can_allocate) {
+                    for (j = 0; j < r; j++)
+                        work[j] += f[i].all[j];
+
                     printf("\nP%d is visited(", i);
-                    for (j = 0; j < r; j++) {
-                        avail[j] += f[i].all[j];
-                    }
-                    for (j = 0; j < r; j++) {
-                        printf(" %d", avail[j]);
-                    }
+                    for (j = 0; j < r; j++)
+                        printf(" %d", work[j]);
                     printf(" )");
 
                     f[i].flag = 1;
